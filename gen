@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+import fs from 'fs'
+import path from 'path'
+
+const toCamelCase = str =>
+  str.replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+
+function createStructure(topFolder, moduleName) {
+  // Ensure the top-level folder exists
+  if (!fs.existsSync(topFolder)) {
+    fs.mkdirSync(topFolder, { recursive: true })
+  }
+
+  // Determine the number for the subfolder
+  const subFolders = fs
+    .readdirSync(topFolder)
+    .filter(f => fs.statSync(path.join(topFolder, f)).isDirectory())
+  const nextNumber = subFolders.length + 1
+
+  // Create the subfolder
+  const subFolderName = `${nextNumber}-${moduleName}`
+  const subFolderPath = path.join(topFolder, subFolderName)
+  fs.mkdirSync(subFolderPath)
+
+  // Create files in the subfolder
+  const camelCaseModuleName = toCamelCase(moduleName)
+  const fileNames = [
+    `${camelCaseModuleName}.js`,
+    `${moduleName}.instrucoes.md`,
+    `${camelCaseModuleName}.test.js`,
+  ]
+  fileNames.forEach(fileName => {
+    fs.writeFileSync(path.join(subFolderPath, fileName), '')
+  })
+
+  console.log(`Created ${subFolderName} in ${topFolder}`)
+}
+
+// Command line arguments: node script.js top-level-folder module
+const args = process.argv.slice(2)
+if (args.length !== 2) {
+  console.log('Usage: node script.js <top-level-folder> <module>')
+  process.exit(1)
+}
+
+const [topFolder, moduleName] = args
+createStructure(topFolder, moduleName)
