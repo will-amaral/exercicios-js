@@ -18,7 +18,7 @@ No caso de testes automatizados, você pode utilizar o comando:
 npm run test
 ```
 
-Esse comando ao ser chamado na raíz do projeto, executa todos os testes automatizados existentes. Caso queira executar uma suite de testes especcíficas, primeiro mova sua linha de comando para a pasta onde eles se encontram:
+Esse comando ao ser chamado na raíz do projeto, executa todos os testes automatizados existentes. Caso queira executar uma suite de testes específicas, primeiro mova sua linha de comando para a pasta onde eles se encontram:
 
 ```bash
 cd arrays/2-conversor-temperaturas
@@ -29,6 +29,10 @@ Em seguida utilize o comando:
 ```bash
 node --test
 ```
+
+### Requisitos
+
+- Node 20.x
 
 ### Submetendo soluções
 
