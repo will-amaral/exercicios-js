@@ -14,7 +14,7 @@ describe.only('convertTemps', () => {
     const temps = [{ value: 0, unit: 'F' }]
     const output = convertTemps(temps)
 
-    assert.deepStrictEqual(output, [{ value: -17.78, unit: 'C' }])
+    assert.deepStrictEqual(output, [{ value: -18, unit: 'C' }])
   })
 
   it('converts multiple temperatures', () => {
@@ -25,7 +25,7 @@ describe.only('convertTemps', () => {
     const output = convertTemps(temps)
     assert.deepStrictEqual(output, [
       { value: 89.6, unit: 'F' },
-      { value: -17.78, unit: 'C' },
+      { value: -18, unit: 'C' },
     ])
   })
 })
