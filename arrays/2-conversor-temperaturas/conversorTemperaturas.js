@@ -11,7 +11,26 @@
  * @returns {Temperature[]}
  */
 function convertTemps(temps) {
-  // Seu código vem aqui
+  for (let indice = 0; indice < temps.length; indice++)
+    if (temps[indice].unit === 'C') {
+      cparaf(indice)
+    } else {
+      fparac(indice)
+    }
+
+  function cparaf(indice) {
+    temps[indice].value = (temps[indice].value * 9) / 5 + 32
+    temps[indice].unit = 'F'
+  }
+
+  function fparac(indice) {
+    const seila = temps[indice].value - 32
+    temps[indice].value = Math.round((seila * 5) / 9)
+    temps[indice].unit = 'C'
+  }
+
+  temps
+
   return temps
 }
 
