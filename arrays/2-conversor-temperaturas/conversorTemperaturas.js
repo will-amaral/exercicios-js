@@ -11,27 +11,22 @@
  * @returns {Temperature[]}
  */
 function convertTemps(temps) {
-  for (let indice = 0; indice < temps.length; indice++)
-    if (temps[indice].unit === 'C') {
-      cparaf(indice)
-    } else {
-      fparac(indice)
-    }
+  return temps.map(({ unit, value }) => {
+    if (unit === 'C') return { unit: 'F', value: (value * 9) / 5 + 32 }
+    else return { unit: 'C', value: Math.round(value - (32 * 5) / 9) }
+  })
+}
+function cparaf(indice) {
+  temps[indice].value = (temps[indice].value * 9) / 5 + 32
+  temps[indice].unit = 'F'
+}
 
-  function cparaf(indice) {
-    temps[indice].value = (temps[indice].value * 9) / 5 + 32
-    temps[indice].unit = 'F'
-  }
-
-  function fparac(indice) {
-    const seila = temps[indice].value - 32
-    temps[indice].value = Math.round((seila * 5) / 9)
-    temps[indice].unit = 'C'
-  }
-
-  temps
+function fparac(indice) {
+  const seila = temps[indice].value - 32
+  temps[indice].value = Math.round((seila * 5) / 9)
 
   return temps
 }
 
 export default convertTemps
+cd
