@@ -28,34 +28,66 @@ const conta = new BankAccount({ name: 'Will', cpf: '123', address: 'Rua Tal' }, 
     address: 'Rua Tal'
   },
   // armazenamento de transações a serem exibidas pelo extrato
-  log: []
-  // MÉTODOS
+  logs: []
+  // MÉTODOS (Todos os métodos podem receber uma data opcional. Caso ela não seja passada, a data utilizada será o padrão de new Date())
   // Saque - recebe o valor a ser sacado subtraindo de balance
-  withdraw(value) {}
+  withdraw(value, date?) {}
   // Depósito - recebe o valor a ser depositado adicionando a balance
-  deposit(value) {}
-  // Extrato - Log de ações - Recebe uma data inicial e uma data final (data final opcional, por padrão deve ser a data de hoje)
-  statement(startDate, endDate) {}
+  deposit(value, date?) {}
+  // Extrato - Mostra o extrato das transações que alteraram o saldo da conta
+  statement(date?) {}
   // alterar dados do usuário - recebe os novos dados como parâmetro
-  updateUser(newUser) {}
+  updateUser(newUser, date?) {}
   // Compra no cartão - adiciona o valor ao limite utilizado. Não pode ser maior que o limite total
-  purchase(value) {}
+  purchase(value, date?) {}
   // Solicitar aumento de limite - pode ser aprovado ou negado
-  increaseLimit() {}
+  increaseLimit(date?) {}
   // Pagar a fatura com o saldo - deve subtrair de balance e liberar o valor em limite utilizado. Pode ser parcial
-  payWithBalance(value) {}
+  payWithBalance(value, date?) {}
   // Pagar a fatura com boleto - libera o valor em limite utilizado mas não deve subtrair de balance. Pode ser parcial
-  payWithSlip(value) {}
+  payWithSlip(value, date?) {}
 }
 ```
 
-#### Regras de Negócio
+#### Regras de Negócio e Dicas
 
-- O limite do cartão deve seguir uma fórmula matemática com base no saldo do usuário e a data de criação da conta: O limite possível base deve ser de 30% do saldo. Esse valor aumenta em 2% para cada mês de distância entre a data atual e a data de criação da conta.
-  Ou seja, para uma conta criada no mesmo dia, com um saldo de 1000 reais, o limite possível é de 300 reais. Entretanto, para uma conta criada há 5 meses atrás, o limite possível aumenta em 10%, sendo o total de 40%. Ou seja, o limite possível é de 400 reais. A alteração de um limite em comparação com a data de criação de uma conta só ocorre quando o usuário solicita o aumento (pela função `increaseLimit`).
-- O log das transações a serem exibidos pelo extrato deve seguir o formato: `<Data> - <Transação>: <símbolo de operação> valor`. Ou seja, para um saque de 20 reais, o log que irá exibir no extrato para essa transação será: `"2022-02-02 - Saque: -20"`. Para armazenar a transação no array, é recomendado utilizar um objeto. Caso a operação não altere o saldo, ela deve ser armazenada no log, mas não deve ser exibida no extrato. Ao chamar a função `statement`, a primeira linha deve ser o saldo total da conta, seguido pela lista de transações que alteraram o saldo em ordem cronológica inversa.
+- O limite do cartão deve seguir uma fórmula matemática com base no saldo do usuário e a data de criação da conta: O limite inicial deve ser de 25% do saldo inicial. Posteriormente, o limite aumenta em 12% para cada mês de distância entre a data atual e a data de criação da conta.
+  Ou seja, para uma conta criada no mesmo mês, com um saldo de 1000 reais, o limite possível é de 250 reais. Entretanto, para uma conta criada há 5 meses atrás com o mesmo saldo, o limite possível aumenta em 60% sobre os 250 reais, sendo o total de 5 \* 12%. O total do limite possível neste exemplo é de 400 reais. A alteração de um limite em comparação com a data de criação de uma conta só ocorre quando o usuário solicita o aumento (pela função `increaseLimit`).
+- O log das transações a serem exibidos pelo extrato deve iniciar sempre com o saldo atual na primeira linha seguido pelas transações em ordem cronológica reversa (do mais recente ao mais antigo), cada uma em uma linha.
+  As transações devem seguir o formato: `<Data da transação> - <Operação>: <Sinal da operação><Valor>`. Por exemplo, para um saldo inicial de 1000 reais, seguido de um depósito de 200, o pagamento de uma fatura de cartão de 100, um saque de 50 e outro depósito de 1000 reais, o log que deve exibir: no extrato para essa transação será:
+
+```
+Saldo Atual: 2050
+--------------------
+Sat, 03 Feb 2024 10:00:00 GMT - Depósito: +1000,
+--------------------
+Sat, 03 Feb 2024 01:00:00 GMT - Saque: -50,
+--------------------
+Fri, 02 Feb 2024 22:00:00 GMT - Pagamento de Fatura: -100,
+--------------------
+Fri, 02 Feb 2024 16:00:00 GMT - Depósito: +200
+```
+
+- Para armazenar a transação no array de logs, utilize um objeto com o seguinte formato:
+
+```javascript
+const log = {
+  // O tipo da operação
+  type: 'withdraw',
+  // Os dados da operação. Cada operação possui um conjunto de dados específicos.
+  // Verifique o caso de teste marcado como it('logs each transaction')
+  // para entender os dados esperados para cada tipo de transação
+  data: {},
+  // O saldo atual no momento da transação
+  currentBalance: 2000,
+  // A data no momento da transação
+  date: new Date(),
+}
+```
+
+- Caso a operação não altere o saldo, ela deve ser armazenada no log, mas não deve ser exibida no extrato. Ao chamar a função `statement`, a primeira linha deve ser o saldo total da conta, seguido pela lista de transações que alteraram o saldo em ordem cronológica inversa. As operações que alteram o saldo são: `deposit`, `withdraw` e `payWithBalance`. A chamada da função `statement` também deve ser armazenada no log de transações.
 - Todas as transações devem exibir no console informações do que foi alterado.
-- Seu código deve evitar alterar manualmente o valor das propriedades. Utilize apenas os métodos.
+- Seu código deve evitar alterar manualmente o valor das propriedades, exceto quando estiver testando algum comportamento. Utilize apenas os métodos. Verifique os testes para entender como você deve utilizar a função construtora.
 - As datas devem ser uma instância de `Date` - [Veja a documentação](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
 - Fique atento às operações inválidas: Por exemplo, o saque de um valor maior que o saldo deve ser proibido.
 
